@@ -1,0 +1,66 @@
+inputs:
+  folder:
+    description: folder where the HTMLs (recursively throughout the folder) will be minified. use rel. path (relative to root)
+    required: false
+    default: "./_site"  # for Jekyll project
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        import os, re, random, subprocess
+
+        ## needed
+        needs = {
+          'act_repo': os.environ['ENV__action_repository'],
+          'ver': os.environ['ENV__action_ref'],  # the Action version.
+        }
+        ACTION_BIO = f"{needs['act_repo']}({needs['ver']})"
+
+        ## inputs
+        ipts = {
+          'folder': os.environ['IPT__folder'],
+        }
+
+        print('─'*99)
+        print(f"INFO: Running {ACTION_BIO}.")
+        print(f"DEBUG: (inputs) folder: {ipts['folder']}")
+
+        ## get the abs.path
+        ABS_PTH = os.path.normpath(os.path.abspath(os.path.join(os.getcwd(), ipts['folder'])))
+        print(f"DEBUG: repr(ABS_PTH): {repr(ABS_PTH)}")
+
+        ## checks
+        if not os.path.isdir(ABS_PTH): raise AssertionError(f"Not a dir: {repr(ABS_PTH)}")
+
+        ## minify HTMLs
+        def main():
+          def recursing(dir_pth):
+            for i in os.listdir(dir_pth):
+              ipth = os.path.join(dir_pth, i)
+              if os.path.isfile(ipth):
+                if i.lower().endswith('.html'):  # just HTML files
+                  size0 = os.path.getsize(ipth)
+                  subprocess.run([
+                    'html-minifier', ipth,
+                    '--remove-comments',
+                    '--minify-css', 'true', '--minify-js', 'true',
+                    '--remove-attribute-quotes',
+                    '--remove-optional-tags',
+                    '--remove-redundant-attributes',
+                    '--collapse-whitespace',
+                    '--collapse-boolean-attributes',
+                    # '--collapse-inline-tag-whitespace',  # not using this, it will remove spaces that shouldnt be removed.
+                    '-o', ipth
+                  ])
+                  print(f"INFO: minified: {os.path.relpath(ipth, START)} ({round(  100*(size0-os.path.getsize(ipth))/size0  )}%)")
+              else: recursing(ipth)
+          recursing(ABS_PTH)
+        main()
+        
+        print(f"─── {ACTION_BIO} finished... random.choice(['Take care!', 'Goodbye!'])")
+      shell: python
+      env:
+        ENV__action_repository: ${{ github.action_repository }}
+        ENV__action_ref: ${{ github.action_ref }}
+        IPT__folder: ${{ inputs.folder }}
