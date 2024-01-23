@@ -58,7 +58,7 @@ runs:
           recursing(ABS_PTH)
         main()
         
-        print(f"─── {ACTION_BIO} finished... random.choice(['Take care!', 'You are awesome, goodbye.'])")
+        print(f"─── {ACTION_BIO} finished... {random.choice(['Take care!', 'You are awesome, goodbye.'])}")
       shell: python
       env:
         ENV__action_repository: ${{ github.action_repository }}
