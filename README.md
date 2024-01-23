@@ -1,9 +1,9 @@
-Minify all your HTML files using [minify-html](https://github.com/kangax/html-minifier) tool with prechosen params (aiming for maximum compression). This is a post-build tool for a website building project.
+Minify all your HTML files using [minify-html](https://github.com/kangax/html-minifier) tool with prechosen params (aiming for maximum compression). This is a pre-build/post-build tool for a website building project.
 
 ## usage
 
 ```yml
-- uses: nvfp/ghact_minify_htmls@...  # use the latest/main branch vers is recommended.
+- uses: nvfp/ghact_minify_htmls@...  # use the latest version is recommended.
   with:
     folder: ./_site  # will minify all HTML files recursively inside this folder (use rel. path, relative to root)
 ```
